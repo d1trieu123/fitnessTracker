@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "start": "./scripts/start-servers.sh",
+    "kill": "./scripts/kill-ports.sh"
+  }
+}
