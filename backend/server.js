@@ -2,8 +2,9 @@ const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
-const Recipe = require("./models/Recipe"); // Import the Recipe model
-const Ingredient = require("./models/Ingredients"); // Import the Ingredient model
+const Recipe = require("./models/Recipe");
+const Ingredient = require("./models/Ingredients");
+const Current_Ingredients = require("./models/currentIngredients");
 
 dotenv.config();
 
@@ -68,14 +69,49 @@ app.get("/searchRecipe", async (req, res) => {
 
 app.get("/getIngredients", async (req, res) => {
     try {
-        const ingredients = await Ingredient.find();
+        // Fetch all ingredients from the database
+        const ingredients = await Current_Ingredients.find();
         res.status(200).json({ ingredients });
+
+        // return all ingredients
+
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Server error while getting ingredients" });
     }
 }
 );
+
+app.post("/addIngredient", async (req, res) => {
+    try {
+        const { name } = req.body;
+        if (!name) {
+            return res.status(400).json({ error: "Ingredient name is required!" });
+        }
+        const existingIngredient = await Current_Ingredients.findOne({ name });
+        if (existingIngredient) {
+            return res.status(400).json({ error: "You already have this ingredient!" });
+
+        }
+        const newIngredient = new Current_Ingredients({ name });
+        await newIngredient.save();
+        res.status(201).json({ message: "Ingredient added successfully!", ingredient: newIngredient });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error while adding ingredient" });
+
+    }
+});
+
+app.get("/getRecipes", async (req, res) => {
+    try {
+        const recipes = await Recipe.find();
+        res.status(200).json({ recipes });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error while getting recipes" });
+    }
+});
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);

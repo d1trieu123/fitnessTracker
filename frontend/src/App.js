@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import API from "./api.js";
 import RecipeForm from "./recipe components/recipeForm.js";
-
+import CurrentIngredients from "./recipe components/currentIngredients.js";
+import CurrentRecipes from "./recipe components/currentRecipes.js";
 
 const App = () => {
 
@@ -21,7 +22,12 @@ const App = () => {
 
   return (
     <div style={{ textAlign: "center", marginTop: "50px" }}>
-      <RecipeForm />
+      <div style={{ flexDirection: "row" }}>
+        <RecipeForm />
+        <CurrentIngredients />
+        <CurrentRecipes />
+      </div>
+
     </div>
 
 
