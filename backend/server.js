@@ -73,7 +73,6 @@ app.get("/getIngredients", async (req, res) => {
         const ingredients = await Current_Ingredients.find();
         res.status(200).json({ ingredients });
 
-        // return all ingredients
 
     } catch (err) {
         console.error(err);
@@ -112,6 +111,100 @@ app.get("/getRecipes", async (req, res) => {
         res.status(500).json({ error: "Server error while getting recipes" });
     }
 });
+
+app.get("/getAvailRecipes", async (req, res) => {
+    try {
+        const allIngredients = await Current_Ingredients.find();
+        const ingredientNames = allIngredients.map((ingredient) => ingredient.name);
+        const recipes = await Recipe.find();
+        let recipeMap = {}; // map to store recipes with missing ingredients
+
+        for (let i = 0; i < recipes.length; i++) {
+            const recipe = recipes[i];
+            let missingIngredients = [];
+            for (let j = 0; j < recipe.ingredients.length; j++) {
+                const ingredient = recipe.ingredients[j];
+                if (!ingredientNames.includes(ingredient)) {
+                    missingIngredients.push(ingredient);
+                }
+            }
+            if (missingIngredients.length > 0) {
+                recipeMap[recipe.name] = missingIngredients;
+            }
+        }
+
+        // Sort recipes by the number of missing ingredients and keep them as an array of tuples
+        const sortedRecipes = Object.entries(recipeMap)
+            .sort((a, b) => a[1].length - b[1].length); // Compare by the length of missing ingredients
+
+        res.status(200).json({ recipes: sortedRecipes });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error while getting available recipes" });
+    }
+});
+
+app.delete("/deleteRecipe", async (req, res) => {
+    try {
+        const { name } = req.body;
+        console.log(name);
+
+        // Check if the name is provided
+        if (!name) {
+            return res.status(400).json({ error: "Recipe Name is required!" });
+        }
+
+        // Find the recipe by name
+        const recipe = await Recipe.findOne({ name });
+
+        // Check if the recipe exists
+        if (!recipe) {
+            return res.status(404).json({ error: "Recipe not found!" });
+        }
+
+        // Delete the recipe
+        await Recipe.deleteOne({
+            name,
+        });
+
+        // Send success response
+        res.status(200).json({ message: "Recipe deleted successfully!" });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error while deleting recipe" });
+    }
+});
+
+app.put("/updateRecipe", async (req, res) => {
+    try {
+        const { name, ingredients, instructions } = req.body;
+        if (!name || !ingredients || !instructions) {
+            return res.status(400).json({ error: "All fields are required!" });
+        }
+        for (let i = 0; i < ingredients.length; i++) {
+            const ingredient = ingredients[i];
+            const existingIngredient = await Ingredient.findOne({ name: ingredient });
+            if (!existingIngredient) {
+                const newIngredient = new Ingredient({ name: ingredient });
+                await newIngredient.save();
+            }
+        }
+
+        const updatedRecipe = await Recipe.findOneAndUpdate(
+            { name },
+            { ingredients, instructions },
+            { new: true }
+        );
+
+        res.status(200).json({ message: "Recipe updated successfully!", recipe: updatedRecipe });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error while updating recipe" });
+    }
+});
+
+
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);

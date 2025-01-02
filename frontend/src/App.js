@@ -5,8 +5,6 @@ import CurrentIngredients from "./recipe components/currentIngredients.js";
 import CurrentRecipes from "./recipe components/currentRecipes.js";
 
 const App = () => {
-
-
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -22,15 +20,14 @@ const App = () => {
 
   return (
     <div style={{ textAlign: "center", marginTop: "50px" }}>
-      <div style={{ flexDirection: "row" }}>
+      <div style={{ display: "flex", justifyContent: "center", gap: "20px" }}>
         <RecipeForm />
         <CurrentIngredients />
+      </div>
+      <div style={{ marginTop: "20px" }}>
         <CurrentRecipes />
       </div>
-
     </div>
-
-
   );
 };
 
