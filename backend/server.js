@@ -117,33 +117,69 @@ app.get("/getAvailRecipes", async (req, res) => {
         const allIngredients = await Current_Ingredients.find();
         const ingredientNames = allIngredients.map((ingredient) => ingredient.name);
         const recipes = await Recipe.find();
-        let recipeMap = {}; // map to store recipes with missing ingredients
+        let recipeMap = {}; // map to store recipes with ingredient categories
 
         for (let i = 0; i < recipes.length; i++) {
             const recipe = recipes[i];
             let missingIngredients = [];
+            let matchedIngredients = [];
+            let similarIngredients = [];
+            let similarIngredientsMap = {}; // To map the similar ingredients for each recipe ingredient
+
             for (let j = 0; j < recipe.ingredients.length; j++) {
                 const ingredient = recipe.ingredients[j];
-                if (!ingredientNames.includes(ingredient)) {
+                let isMatched = false;
+                let isSimilar = false;
+
+                for (let k = 0; k < allIngredients.length; k++) {
+                    const currentIngredient = allIngredients[k].name;
+                    console.log(currentIngredient, ingredient);
+
+                    if (ingredient === currentIngredient) {
+                        matchedIngredients.push(ingredient);
+                        isMatched = true;
+                        break; // Stop checking once matched
+                    } else if (ingredient.includes(currentIngredient)) {
+                        // If a similar ingredient is found, map it
+                        if (!similarIngredientsMap[ingredient]) {
+                            similarIngredientsMap[ingredient] = [];
+                        }
+                        similarIngredientsMap[ingredient].push(currentIngredient);
+                        isSimilar = true;
+                    }
+                }
+
+                if (!isMatched && !isSimilar) {
                     missingIngredients.push(ingredient);
                 }
             }
-            if (missingIngredients.length > 0) {
-                recipeMap[recipe.name] = missingIngredients;
+
+            // Store the similar ingredients map
+            if (
+                missingIngredients.length > 0 ||
+                matchedIngredients.length > 0 ||
+                Object.keys(similarIngredientsMap).length > 0
+            ) {
+                recipeMap[recipe.name] = {
+                    missingIngredients,
+                    matchedIngredients,
+                    similarIngredientsMap,
+                };
             }
         }
 
         // Sort recipes by the number of missing ingredients and keep them as an array of tuples
-        const sortedRecipes = Object.entries(recipeMap)
-            .sort((a, b) => a[1].length - b[1].length); // Compare by the length of missing ingredients
-
+        const sortedRecipes = Object.entries(recipeMap).sort(
+            (a, b) => a[1].missingIngredients.length - b[1].missingIngredients.length
+        );
+        console.log(sortedRecipes);
         res.status(200).json({ recipes: sortedRecipes });
-
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Server error while getting available recipes" });
     }
 });
+
 
 app.delete("/deleteRecipe", async (req, res) => {
     try {
@@ -203,6 +239,25 @@ app.put("/updateRecipe", async (req, res) => {
         res.status(500).json({ error: "Server error while updating recipe" });
     }
 });
+
+app.delete("/deleteIngredient", async (req, res) => {
+    try {
+        const { name } = req.body;
+        if (!name) {
+            return res.status(400).json({ error: "Ingredient name is required!" });
+        }
+        const existingIngredient = await Current_Ingredients.findOne({ name });
+        if (!existingIngredient) {
+            return res.status(404).json({ error: "Ingredient not found!" });
+        }
+        await Current_Ingredients.deleteOne({ name });
+        res.status(200).json({ message: "Ingredient deleted successfully!" });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error while deleting ingredient" });
+    }
+}
+);
 
 
 

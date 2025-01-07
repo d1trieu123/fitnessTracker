@@ -211,29 +211,61 @@ function CurrentRecipes() {
             >
                 <h1 style={{ textAlign: "center", marginBottom: "20px" }}>Available Recipes</h1>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "20px", justifyContent: "center" }}>
-                    {availRecipes.map(([recipeName, missingIngredients], index) => (
-                        <div
-                            key={index}
-                            style={{
-                                flex: "1 1 calc(300px - 20px)",
-                                border: "1px solid #eee",
-                                borderRadius: "8px",
-                                padding: "15px",
-                                maxWidth: "300px",
-                                backgroundColor: "#f9f9f9",
-                            }}
-                        >
-                            <h2 style={{ color: "#333", marginBottom: "10px" }}>{recipeName}</h2>
-                            <h3 style={{ color: "red", marginBottom: "5px" }}>Missing Ingredients:</h3>
-                            <ul style={{ paddingLeft: "20px", marginBottom: "10px" }}>
-                                {missingIngredients.map((ingredient, i) => (
-                                    <li key={i} style={{ color: "red", marginBottom: "5px" }}>
-                                        {ingredient}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    ))}
+                    {availRecipes.map(
+                        ([recipeName, { missingIngredients, matchedIngredients, similarIngredientsMap }], index) => (
+                            <div
+                                key={index}
+                                style={{
+                                    flex: "1 1 calc(300px - 20px)",
+                                    border: "1px solid #eee",
+                                    borderRadius: "8px",
+                                    padding: "15px",
+                                    maxWidth: "300px",
+                                    backgroundColor: "#f9f9f9",
+                                }}
+                            >
+                                <h2 style={{ color: "#333", marginBottom: "10px" }}>{recipeName}</h2>
+
+                                {/* Matched Ingredients Section */}
+                                <h3 style={{ color: "green", marginBottom: "5px" }}>Matched Ingredients:</h3>
+                                <ul style={{ paddingLeft: "20px", marginBottom: "10px" }}>
+                                    {matchedIngredients.map((ingredient, i) => (
+                                        <li key={i} style={{ color: "green", marginBottom: "5px" }}>
+                                            {ingredient}
+                                        </li>
+                                    ))}
+                                </ul>
+
+                                {/* Similar Ingredients Section */}
+                                <h3 style={{ color: "orange", marginBottom: "5px" }}>Similar Ingredients:</h3>
+                                <ul style={{ paddingLeft: "20px", marginBottom: "10px" }}>
+                                    {Object.entries(similarIngredientsMap).map(([recipeIngredient, similarIngredients], i) => (
+                                        <li key={i} style={{ marginBottom: "10px" }}>
+                                            <h4 style={{ color: "orange" }}>{recipeIngredient}:</h4>
+                                            <ul style={{ paddingLeft: "20px", marginBottom: "10px" }}>
+                                                {similarIngredients.map((similarIngredient, j) => (
+                                                    <li key={j} style={{ color: "black", marginBottom: "5px" }}>
+                                                        {similarIngredient}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </li>
+                                    ))}
+                                </ul>
+
+                                {/* Missing Ingredients Section */}
+                                <h3 style={{ color: "red", marginBottom: "5px" }}>Missing Ingredients:</h3>
+                                <ul style={{ paddingLeft: "20px", marginBottom: "10px" }}>
+                                    {missingIngredients.map((ingredient, i) => (
+                                        <li key={i} style={{ color: "red", marginBottom: "5px" }}>
+                                            {ingredient}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )
+                    )}
+
                 </div>
             </div>
         </div>

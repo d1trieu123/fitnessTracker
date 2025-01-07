@@ -22,6 +22,17 @@ function CurrentIngredients() {
         }
     };
 
+    const handleRemove = async (ingredient) => {
+        try {
+            await axios.delete("http://localhost:3001/deleteIngredient", { data: { name: ingredient } });
+            alert("Ingredient removed successfully!");
+            setIngredients((prevIngredients) => prevIngredients.filter((ing) => ing !== ingredient));
+        } catch (err) {
+            console.error("Error removing ingredient:", err);
+            alert("Error removing ingredient. Please try again.");
+        }
+    };
+
     useEffect(() => {
         try {
             axios.get("http://localhost:3001/getIngredients")
@@ -90,6 +101,16 @@ function CurrentIngredients() {
         listItem: {
             padding: "10px",
             borderBottom: "1px solid #ddd",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+        },
+        removeButton: {
+            color: "red",
+            backgroundColor: "transparent",
+            border: "none",
+            cursor: "pointer",
+            fontSize: "16px",
         },
     };
 
@@ -124,7 +145,24 @@ function CurrentIngredients() {
                 <h4 style={styles.title}>Ingredients List:</h4>
                 <ul style={styles.ingredientsList}>
                     {ingredients.map((ingredient, index) => (
-                        <li key={index} style={styles.listItem}>{ingredient}</li>
+                        <li key={index} style={styles.listItem}>
+                            {ingredient}
+                            <button
+                                style={{
+                                    position: "relative",
+                                    top: "10px",
+                                    right: "10px",
+                                    backgroundColor: "red",
+                                    color: "#fff",
+                                    border: "none",
+                                    borderRadius: "4px",
+                                    cursor: "pointer",
+                                }}
+                                onClick={() => handleRemove(ingredient)}
+                            >
+                                X
+                            </button>
+                        </li>
                     ))}
                 </ul>
             </div>
