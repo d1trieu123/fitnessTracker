@@ -29,6 +29,14 @@ function RecipeForm() {
         }
     };
 
+    const removeIngredient = (ingredient) => {
+        setIngredients(ingredients.filter((item) => item !== ingredient));
+    };
+
+    const removeInstruction = (step) => {
+        setInstructions(instructions.filter((item) => item !== step));
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -44,7 +52,7 @@ function RecipeForm() {
         };
 
         try {
-            const response = await axios.post("http://localhost:3001/addRecipe", recipeData);
+            await axios.post("http://localhost:3001/addRecipe", recipeData);
             alert("Recipe added successfully!");
             setName("");
             setIngredients([]);
@@ -54,6 +62,20 @@ function RecipeForm() {
         } catch (err) {
             setError("Error adding recipe");
             console.error(err);
+        }
+    };
+
+    const handleIngredientKeyDown = (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault(); // Prevent form submission
+            addIngredient();
+        }
+    };
+
+    const handleInstructionKeyDown = (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault(); // Prevent form submission
+            addInstruction();
         }
     };
 
@@ -82,7 +104,7 @@ function RecipeForm() {
         },
         input: {
             width: "100%",
-            padding: "10px",
+            padding: "5px",  // This applies padding equally to all sides (top, right, bottom, left)
             fontSize: "16px",
             border: "1px solid #ccc",
             borderRadius: "4px",
@@ -107,10 +129,20 @@ function RecipeForm() {
         listItem: {
             padding: "5px 0",
             borderBottom: "1px solid #ddd",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
         },
         error: {
             color: "red",
             marginTop: "10px",
+        },
+        removeButton: {
+            backgroundColor: "transparent",
+            border: "none",
+            color: "red",
+            cursor: "pointer",
+            fontSize: "16px",
         },
     };
 
@@ -126,6 +158,7 @@ function RecipeForm() {
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         style={styles.input}
+                        placeholder="Enter recipe name"
                         required
                     />
                 </div>
@@ -137,6 +170,7 @@ function RecipeForm() {
                         id="currentIngredient"
                         value={currentIngredient}
                         onChange={(e) => setCurrentIngredient(e.target.value)}
+                        onKeyDown={handleIngredientKeyDown} // Add event handler for Enter key
                         placeholder="Enter ingredient"
                         style={styles.input}
                     />
@@ -154,7 +188,16 @@ function RecipeForm() {
                     <h4>Ingredients List:</h4>
                     <ul style={styles.list}>
                         {ingredients.map((ingredient, index) => (
-                            <li key={index} style={styles.listItem}>{ingredient}</li>
+                            <li key={index} style={styles.listItem}>
+                                {ingredient}
+                                <button
+                                    type="button"
+                                    onClick={() => removeIngredient(ingredient)}
+                                    style={styles.removeButton}
+                                >
+                                    X
+                                </button>
+                            </li>
                         ))}
                     </ul>
                 </div>
@@ -166,6 +209,7 @@ function RecipeForm() {
                         id="currentInstruction"
                         value={currentInstruction}
                         onChange={(e) => setCurrentInstruction(e.target.value)}
+                        onKeyDown={handleInstructionKeyDown} // Add event handler for Enter key
                         placeholder="Enter step of instruction"
                         style={styles.input}
                     />
@@ -183,7 +227,16 @@ function RecipeForm() {
                     <h4>Instructions List:</h4>
                     <ul style={styles.list}>
                         {instructions.map((step, index) => (
-                            <li key={index} style={styles.listItem}>{step}</li>
+                            <li key={index} style={styles.listItem}>
+                                {step}
+                                <button
+                                    type="button"
+                                    onClick={() => removeInstruction(step)}
+                                    style={styles.removeButton}
+                                >
+                                    X
+                                </button>
+                            </li>
                         ))}
                     </ul>
                 </div>

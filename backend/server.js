@@ -123,7 +123,6 @@ app.get("/getAvailRecipes", async (req, res) => {
             const recipe = recipes[i];
             let missingIngredients = [];
             let matchedIngredients = [];
-            let similarIngredients = [];
             let similarIngredientsMap = {}; // To map the similar ingredients for each recipe ingredient
 
             for (let j = 0; j < recipe.ingredients.length; j++) {
@@ -133,7 +132,6 @@ app.get("/getAvailRecipes", async (req, res) => {
 
                 for (let k = 0; k < allIngredients.length; k++) {
                     const currentIngredient = allIngredients[k].name;
-                    console.log(currentIngredient, ingredient);
 
                     if (ingredient === currentIngredient) {
                         matchedIngredients.push(ingredient);
@@ -172,7 +170,6 @@ app.get("/getAvailRecipes", async (req, res) => {
         const sortedRecipes = Object.entries(recipeMap).sort(
             (a, b) => a[1].missingIngredients.length - b[1].missingIngredients.length
         );
-        console.log(sortedRecipes);
         res.status(200).json({ recipes: sortedRecipes });
     } catch (err) {
         console.error(err);
@@ -184,7 +181,6 @@ app.get("/getAvailRecipes", async (req, res) => {
 app.delete("/deleteRecipe", async (req, res) => {
     try {
         const { name } = req.body;
-        console.log(name);
 
         // Check if the name is provided
         if (!name) {
